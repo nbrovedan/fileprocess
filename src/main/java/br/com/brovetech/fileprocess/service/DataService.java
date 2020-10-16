@@ -7,11 +7,11 @@ import br.com.brovetech.fileprocess.model.Sale;
 import br.com.brovetech.fileprocess.model.Salesman;
 import br.com.brovetech.fileprocess.utils.SaleBySalesmanComparator;
 import br.com.brovetech.fileprocess.utils.SaleComparator;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -35,31 +35,47 @@ public class DataService {
     }
 
     private static List<Customer> getDistinctCustomers(SalesDTO salesDTO){
-        return salesDTO.getCustomers().stream().filter(distinctByField(Customer::getCnpj)).collect(Collectors.toList());
+        return salesDTO.getCustomers()
+                .stream()
+                .filter(distinctByField(Customer::getCnpj))
+                .collect(Collectors.toList());
     }
 
     private static List<Salesman> getDistinctSalesmans(SalesDTO salesDTO){
-        return salesDTO.getSalemans().stream().filter(distinctByField(Salesman::getCpf)).collect(Collectors.toList());
+        return salesDTO.getSalemans()
+                .stream()
+                .filter(distinctByField(Salesman::getCpf))
+                .collect(Collectors.toList());
     }
 
     private static Sale getMostExpensiveSale(SalesDTO salesDTO){
         return salesDTO.getSales()
                 .stream()
                 .max(new SaleComparator())
-                .orElse(Sale.builder().build());
+                .orElse(null);
     }
 
     private static Salesman getWorstSalesman(SalesDTO salesDTO){
-        Map<String, List<Sale>> salesBySalesman = salesDTO.getSales().stream().filter(distinctByField(Sale::getId)).collect(groupingBy(Sale::getSalesmanName));
+        Map<String, List<Sale>> salesBySalesman = salesDTO.getSales()
+                .stream()
+                .filter(distinctByField(Sale::getId))
+                .collect(groupingBy(Sale::getSalesmanName));
         String worstSalesmanName = salesBySalesman.entrySet()
                 .stream()
                 .min(comparingByValue(new SaleBySalesmanComparator()))
                 .map(Map.Entry::getKey)
                 .orElse(EMPTY);
-        return salesDTO.getSalemans().stream().filter(salesman -> salesman.getName().equalsIgnoreCase(worstSalesmanName)).findFirst().orElse(Salesman.builder().build());
+        return salesDTO.getSalemans()
+                .stream()
+                .filter(salesman -> salesman.getName().equalsIgnoreCase(worstSalesmanName))
+                .findFirst()
+                .orElse(null);
     }
 
     private static <T> Predicate<T> distinctByField(Function<? super T, ?> keyExtractor) {
+        if(keyExtractor == null){
+            return null;
+        }
         Set<Object> seen = newKeySet();
         return t -> seen.add(keyExtractor.apply(t));
     }
