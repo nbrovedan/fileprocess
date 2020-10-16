@@ -1,7 +1,5 @@
 package br.com.brovetech.fileprocess.watcher;
 
-import br.com.brovetech.fileprocess.config.Constants;
-import br.com.brovetech.fileprocess.enumeration.ErrorMessageEnum;
 import br.com.brovetech.fileprocess.exception.FileException;
 import br.com.brovetech.fileprocess.service.FileService;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +10,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.Objects;
 
 import static br.com.brovetech.fileprocess.config.Constants.*;
 import static br.com.brovetech.fileprocess.enumeration.ErrorMessageEnum.ERROR_ON_PROCESS_FILE;
@@ -55,7 +54,9 @@ public class InputFileWatcher {
         } catch (Exception e) {
             throw new FileException(format(ERROR_ON_PROCESS_FILE.toString(), e.getMessage()), e);
         } finally {
-            watchService.close();
+            if(Objects.nonNull(watchService)){
+                watchService.close();
+            }
         }
     }
 

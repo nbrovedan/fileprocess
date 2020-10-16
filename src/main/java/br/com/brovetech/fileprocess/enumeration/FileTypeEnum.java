@@ -2,7 +2,7 @@ package br.com.brovetech.fileprocess.enumeration;
 
 import java.util.Arrays;
 
-import static br.com.brovetech.fileprocess.config.Constants.EMPTY;
+import static org.apache.logging.log4j.util.Strings.EMPTY;
 
 public enum FileTypeEnum {
     SALESMAN("001"), CUSTOMER("002"), SALE("003"), UNKNOWN(EMPTY);

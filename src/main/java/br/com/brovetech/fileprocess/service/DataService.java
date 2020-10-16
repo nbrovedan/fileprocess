@@ -7,6 +7,7 @@ import br.com.brovetech.fileprocess.model.Sale;
 import br.com.brovetech.fileprocess.model.Salesman;
 import br.com.brovetech.fileprocess.utils.SaleBySalesmanComparator;
 import br.com.brovetech.fileprocess.utils.SaleComparator;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +17,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static br.com.brovetech.fileprocess.config.Constants.EMPTY;
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.concurrent.ConcurrentHashMap.newKeySet;
 import static java.util.stream.Collectors.groupingBy;
+import static org.apache.logging.log4j.util.Strings.EMPTY;
 
 @Service
 public class DataService {

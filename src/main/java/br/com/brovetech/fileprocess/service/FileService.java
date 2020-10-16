@@ -3,7 +3,11 @@ package br.com.brovetech.fileprocess.service;
 import br.com.brovetech.fileprocess.dto.ProcessedDataDTO;
 import br.com.brovetech.fileprocess.dto.SalesDTO;
 import br.com.brovetech.fileprocess.enumeration.FileTypeEnum;
+import br.com.brovetech.fileprocess.exception.FileEmptyException;
 import br.com.brovetech.fileprocess.exception.FileException;
+import br.com.brovetech.fileprocess.parser.CustomerLineParser;
+import br.com.brovetech.fileprocess.parser.SaleLineParser;
+import br.com.brovetech.fileprocess.parser.SalesmanLineParser;
 import br.com.brovetech.fileprocess.utils.CustomFileFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,10 +25,7 @@ import java.util.stream.Stream;
 
 import static br.com.brovetech.fileprocess.config.Constants.*;
 import static br.com.brovetech.fileprocess.enumeration.ErrorMessageEnum.*;
-import static br.com.brovetech.fileprocess.mapper.CustomerMapper.toCustomer;
 import static br.com.brovetech.fileprocess.mapper.ProcessDataMapper.toFileOutput;
-import static br.com.brovetech.fileprocess.mapper.SaleMapper.toSale;
-import static br.com.brovetech.fileprocess.mapper.SalesmanMapper.toSalesman;
 import static java.lang.String.format;
 import static java.time.LocalDateTime.now;
 import static java.time.format.DateTimeFormatter.ofPattern;
@@ -52,18 +53,33 @@ public class FileService {
     }
 
     public void processFile(String path, String fileName) {
-        String sourcePath = path.concat(File.separator).concat(DIR_IN).concat(File.separator).concat(fileName);
-        Path source = Paths.get(sourcePath);
+        Path source = Paths.get(path.concat(File.separator).concat(DIR_IN).concat(File.separator).concat(fileName));
         try {
+            isValidFile(source);
+
             try (Stream<String> stream = Files.lines(source)) {
                 stream.forEach(this::loadLine);
             } finally {
-                Path dest = Paths.get(sourcePath.replace(extensionFile, EXTENSION_PROCESSED));
-                Files.move(source, dest, StandardCopyOption.REPLACE_EXISTING);
+                renameProcessedFile(source);
                 this.saveResult(path);
             }
+        } catch (FileEmptyException e) {
+            log.error(e.getMessage());
         } catch (IOException io){
             throw new FileException(format(ERROR_ON_PROCESS_FILE.toString(), io.getMessage()), io);
+        }
+    }
+
+    private void renameProcessedFile(Path source) throws IOException {
+        String sourcePath = source.getParent().toString().concat(File.separator).concat(source.getFileName().toString());
+        Path dest = Paths.get(sourcePath.replace(extensionFile, EXTENSION_PROCESSED));
+        Files.move(source, dest, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    private void isValidFile(Path source) throws IOException {
+        if(Files.size(source) == (long) ZERO){
+            renameProcessedFile(source);
+            throw new FileEmptyException(format(ERROR_EMPTY_FILE.toString(), source.getFileName().toString()));
         }
     }
 
@@ -73,13 +89,13 @@ public class FileService {
 
         switch (fileType){
             case SALESMAN:
-                salesDTO.getSalemans().add(toSalesman(line));
+                SalesmanLineParser.parse(salesDTO.getSalemans(), line);
                 break;
             case CUSTOMER:
-                salesDTO.getCustomers().add(toCustomer(line));
+                CustomerLineParser.parse(salesDTO.getCustomers(), line);
                 break;
             case SALE:
-                salesDTO.getSales().add(toSale(line));
+                SaleLineParser.parse(salesDTO.getSales(), line);
                 break;
             default:
                 log.error(format(FILE_CODE_IS_NOT_VALID.toString(), fileCode));
@@ -104,6 +120,6 @@ public class FileService {
     }
 
     private boolean isAllFileProcessed(String path){
-        return Objects.requireNonNull(new File(path).listFiles(new CustomFileFilter())).length == 0;
+        return Objects.requireNonNull(new File(path).listFiles(new CustomFileFilter(extensionFile))).length == 0;
     }
 }
