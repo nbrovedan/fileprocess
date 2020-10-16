@@ -1,5 +1,6 @@
 package br.com.brovetech.fileprocess.mapper;
 
+import br.com.brovetech.fileprocess.config.Constants;
 import br.com.brovetech.fileprocess.model.Sale;
 import br.com.brovetech.fileprocess.model.SaleItem;
 import lombok.experimental.UtilityClass;
@@ -8,13 +9,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static br.com.brovetech.fileprocess.config.Constants.EMPTY;
+import static br.com.brovetech.fileprocess.config.Constants.SEPARATOR;
+
 @UtilityClass
 public class SaleMapper {
 
-    private static final String SEPARATOR = "ç";
     private static final String ITEM_SEPARATOR = ",";
     private static final String REGEX = "\\[|\\]";
-    private static final String EMPTY = "";
 
     public static Sale toSale(String line){
         List<String> sale = Arrays.asList(line.split(SEPARATOR));

@@ -12,5 +12,4 @@ public class ProcessDataMapper {
                 .concat(String.format("Id venda mais cara: %d", processedDataDTO.getMostExpensiveSale().getId())).concat(System.lineSeparator())
                 .concat(String.format("Pior vendedor: %s", processedDataDTO.getWorstSalesman().getName()));
     }
-
 }

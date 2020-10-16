@@ -16,14 +16,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static br.com.brovetech.fileprocess.config.Constants.EMPTY;
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.concurrent.ConcurrentHashMap.newKeySet;
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class DataService {
-
-    private static final String EMPTY = "";
 
     public ProcessedDataDTO processData(SalesDTO salesDTO){
         return ProcessedDataDTO.builder()
@@ -56,7 +55,7 @@ public class DataService {
                 .min(comparingByValue(new SaleBySalesmanComparator()))
                 .map(Map.Entry::getKey)
                 .orElse(EMPTY);
-        return salesDTO.getSalemans().stream().filter(salesman -> salesman.getName().equalsIgnoreCase(worstSalesmanName)).findFirst().orElse(null);
+        return salesDTO.getSalemans().stream().filter(salesman -> salesman.getName().equalsIgnoreCase(worstSalesmanName)).findFirst().orElse(Salesman.builder().build());
     }
 
     private static <T> Predicate<T> distinctByField(Function<? super T, ?> keyExtractor) {

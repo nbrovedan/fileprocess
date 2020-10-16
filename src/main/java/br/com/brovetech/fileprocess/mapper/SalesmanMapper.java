@@ -1,15 +1,16 @@
 package br.com.brovetech.fileprocess.mapper;
 
+import br.com.brovetech.fileprocess.config.Constants;
 import br.com.brovetech.fileprocess.model.Salesman;
 import lombok.experimental.UtilityClass;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static br.com.brovetech.fileprocess.config.Constants.SEPARATOR;
+
 @UtilityClass
 public class SalesmanMapper {
-
-    private static final String SEPARATOR = "ç";
 
     public static Salesman toSalesman(String line){
         List<String> salesman = Arrays.asList(line.split(SEPARATOR));
